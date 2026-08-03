@@ -6,7 +6,7 @@
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@base <https://example.org/worlds-ontology-ecosystem/day1> .
+@base <https://example.org/worlds-ontology-ecosystem/day1#> .
 
 <https://example.org/worlds-ontology-ecosystem/day1> rdf:type owl:Ontology ;
                                                       owl:imports bfo:bfo.owl ;
@@ -19,6 +19,8 @@
 
 ###  https://example.org/worlds-ontology-ecosystem/day1/hasMeasurementUnit
 ex:hasMeasurementUnit rdf:type owl:ObjectProperty ;
+                      rdfs:domain ex:MeasurementDatum ;
+                      rdfs:range ex:MeasurementUnit ;
                       rdfs:label "has measurement unit"@en .
 
 
@@ -40,6 +42,40 @@ ex:hasDecimalValue rdf:type owl:DatatypeProperty ;
 #################################################################
 #    Classes
 #################################################################
+
+###  https://example.org/worlds-ontology-ecosystem/day1#KnotSpeedMeasurementDatum
+:KnotSpeedMeasurementDatum rdf:type owl:Class ;
+                           owl:equivalentClass [ owl:intersectionOf ( ex:SpeedMeasurementDatum
+                                                                      [ rdf:type owl:Restriction ;
+                                                                        owl:onProperty ex:hasMeasurementUnit ;
+                                                                        owl:hasValue :knot
+                                                                      ]
+                                                                    ) ;
+                                                 rdf:type owl:Class
+                                               ] .
+
+
+###  https://example.org/worlds-ontology-ecosystem/day1#ProcessMeasurement
+:ProcessMeasurement rdf:type owl:Class ;
+                    owl:equivalentClass [ owl:intersectionOf ( ex:ActOfMotion
+                                                               ex:MeasurementDatum
+                                                             ) ;
+                                          rdf:type owl:Class
+                                        ] .
+
+
+###  https://example.org/worlds-ontology-ecosystem/day1#StationaryPatrolBoat
+:StationaryPatrolBoat rdf:type owl:Class ;
+                      owl:equivalentClass [ owl:intersectionOf ( ex:PatrolBoat
+                                                                 [ rdf:type owl:Restriction ;
+                                                                   owl:onProperty bfo:BFO_0000056 ;
+                                                                   owl:maxQualifiedCardinality "0"^^xsd:nonNegativeInteger ;
+                                                                   owl:onClass ex:ActOfMotion
+                                                                 ]
+                                                               ) ;
+                                            rdf:type owl:Class
+                                          ] .
+
 
 ###  https://example.org/worlds-ontology-ecosystem/day1/ActOfMotion
 ex:ActOfMotion rdf:type owl:Class ;
@@ -124,8 +160,12 @@ ex:SpeedMeasurementDatum rdf:type owl:Class ;
 
 ###  https://example.org/worlds-ontology-ecosystem/day1#patrol_boat_01
 :patrol_boat_01 rdf:type owl:NamedIndividual ,
-                         ex:PatrolBoat ;
-                bfo:BFO_0000056 :motion_01 .
+                         ex:PatrolBoat ,
+                         [ rdf:type owl:Restriction ;
+                           owl:onProperty bfo:BFO_0000056 ;
+                           owl:maxQualifiedCardinality "0"^^xsd:nonNegativeInteger ;
+                           owl:onClass ex:ActOfMotion
+                         ] .
 
 
 ###  https://example.org/worlds-ontology-ecosystem/day1#speed_measurement_01
