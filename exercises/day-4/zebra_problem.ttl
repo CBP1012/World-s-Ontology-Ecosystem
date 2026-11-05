@@ -1,0 +1,296 @@
+@prefix : <http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115/> .
+
+<http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115> rdf:type owl:Ontology .
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#drinks
+:drinks rdf:type owl:ObjectProperty ;
+        rdfs:subPropertyOf owl:topObjectProperty ;
+        rdfs:domain :person ;
+        rdfs:range :drink .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#has_color
+:has_color rdf:type owl:ObjectProperty ;
+           rdfs:subPropertyOf owl:topObjectProperty ;
+           rdfs:domain :house ;
+           rdfs:range :color .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#has_nationality
+:has_nationality rdf:type owl:ObjectProperty ;
+                 rdfs:subPropertyOf owl:topObjectProperty .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#is_drunk_in
+:is_drunk_in rdf:type owl:ObjectProperty ;
+             rdfs:subPropertyOf owl:topObjectProperty ;
+             rdfs:domain :house ;
+             rdfs:range :drink .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#is_kept_in
+:is_kept_in rdf:type owl:ObjectProperty ;
+            rdfs:subPropertyOf owl:topObjectProperty ;
+            rdfs:domain :pets ;
+            rdfs:range :house .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#lives_in
+:lives_in rdf:type owl:ObjectProperty ;
+          rdfs:subPropertyOf owl:topObjectProperty ;
+          rdfs:domain :person ;
+          rdfs:range :house .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#next_to
+:next_to rdf:type owl:ObjectProperty ;
+         rdfs:subPropertyOf owl:topObjectProperty ;
+         rdf:type owl:SymmetricProperty ;
+         rdfs:domain :house ;
+         rdfs:range :house .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#owns
+:owns rdf:type owl:ObjectProperty ;
+      rdfs:subPropertyOf owl:topObjectProperty ;
+      rdfs:domain :person ;
+      rdfs:range :pets .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#smoked_in
+:smoked_in rdf:type owl:ObjectProperty ;
+           rdfs:subPropertyOf owl:topObjectProperty ;
+           rdfs:domain :cigarettes ;
+           rdfs:range :house .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#smokes
+:smokes rdf:type owl:ObjectProperty ;
+        rdfs:subPropertyOf owl:topObjectProperty ;
+        rdfs:domain :person ;
+        rdfs:range :cigarettes .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#to_the_right_of
+:to_the_right_of rdf:type owl:ObjectProperty ;
+                 rdfs:subPropertyOf owl:topObjectProperty ;
+                 rdf:type owl:FunctionalProperty ;
+                 rdfs:domain :house ;
+                 rdfs:range :house .
+
+
+###  http://www.w3.org/2002/07/owl#topObjectProperty
+owl:topObjectProperty rdfs:domain :person ;
+                      rdfs:range :nationality .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#cigarettes
+:cigarettes rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#color
+:color rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#drink
+:drink rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#house
+:house rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#nationality
+:nationality rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#person
+:person rdf:type owl:Class .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#pets
+:pets rdf:type owl:Class .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Blue
+:Blue rdf:type owl:NamedIndividual .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Chesterfields
+:Chesterfields rdf:type owl:NamedIndividual ,
+                        :cigarettes .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Green
+:Green rdf:type owl:NamedIndividual ,
+                :color .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Ivory
+:Ivory rdf:type owl:NamedIndividual .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Japanese
+:Japanese rdf:type owl:NamedIndividual ;
+          :smokes :Parliments .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Kools
+:Kools rdf:type owl:NamedIndividual ,
+                :cigarettes .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Lucky_Strike
+:Lucky_Strike rdf:type owl:NamedIndividual ,
+                       :cigarettes .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Milk
+:Milk rdf:type owl:NamedIndividual ,
+               :drink .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Orange_Juice
+:Orange_Juice rdf:type owl:NamedIndividual ,
+                       :drink .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Parliments
+:Parliments rdf:type owl:NamedIndividual ,
+                     :cigarettes .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Red
+:Red rdf:type owl:NamedIndividual ,
+              :color .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Spaniard
+:Spaniard rdf:type owl:NamedIndividual ,
+                   :nationality .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Tea
+:Tea rdf:type owl:NamedIndividual ,
+              :drink .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Ukrainian
+:Ukrainian rdf:type owl:NamedIndividual ,
+                    :nationality .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Yellow
+:Yellow rdf:type owl:NamedIndividual .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#Zebra
+:Zebra rdf:type owl:NamedIndividual ,
+                :pets .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#coffee
+:coffee rdf:type owl:NamedIndividual ,
+                 :drink .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#dog
+:dog rdf:type owl:NamedIndividual ,
+              :pets .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#englishman
+:englishman rdf:type owl:NamedIndividual ,
+                     :nationality .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#fox
+:fox rdf:type owl:NamedIndividual ,
+              :pets .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#horse
+:horse rdf:type owl:NamedIndividual ,
+                :pets .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#house1
+:house1 rdf:type owl:NamedIndividual ,
+                 :house ;
+        :has_color :Red .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#house2
+:house2 rdf:type owl:NamedIndividual ,
+                 :house ;
+        :has_color :Green .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#house3
+:house3 rdf:type owl:NamedIndividual ,
+                 :house .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#house4
+:house4 rdf:type owl:NamedIndividual ,
+                 :house .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#house5
+:house5 rdf:type owl:NamedIndividual ,
+                 :house .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#person1
+:person1 rdf:type owl:NamedIndividual ,
+                  :person ;
+         :has_nationality :englishman ;
+         :lives_in :house1 .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#person2
+:person2 rdf:type owl:NamedIndividual ;
+         :has_nationality :Spaniard ;
+         :owns :dog .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#person3
+:person3 rdf:type owl:NamedIndividual ;
+         :drinks :coffee ;
+         :lives_in :house2 .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#person4
+:person4 rdf:type owl:NamedIndividual ;
+         :drinks :Tea ;
+         :has_nationality :Ukrainian .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#person5
+:person5 rdf:type owl:NamedIndividual .
+
+
+###  http://www.semanticweb.org/crist/ontologies/2026/7/untitled-ontology-115#snails
+:snails rdf:type owl:NamedIndividual ,
+                 :pets .
+
+
+###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

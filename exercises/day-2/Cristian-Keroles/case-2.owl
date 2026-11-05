@@ -1,0 +1,147 @@
+@prefix : <https://test.org/eo/p3#> .
+@prefix eo: <https://test.org/eo/p3#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@base <https://test.org/eo/p3#> .
+
+<https://test.org/eo/p3#> rdf:type owl:Ontology ;
+                           owl:imports <file:///C:/Users/crist/Documents/GitHub/World-s-Ontology-Ecosystem/exercises/day-2/Cristian-Keroles/bfo-core%2B.ttl> ;
+                           rdfs:label "Aircraft Approach Speed Example Ontology" .
+
+#################################################################
+#    Annotation properties
+#################################################################
+
+###  http://www.w3.org/2004/02/skos/core#definition
+skos:definition rdf:type owl:AnnotationProperty .
+
+
+###  http://www.w3.org/2004/02/skos/core#example
+skos:example rdf:type owl:AnnotationProperty .
+
+
+#################################################################
+#    Object Properties
+#################################################################
+
+###  https://test.org/eo/p3#is_about
+eo:is_about rdf:type owl:ObjectProperty ;
+            rdfs:label "is about" ;
+            skos:definition "A relation indicating what an Information Content Entity is about or concerns." .
+
+
+###  https://test.org/eo/p3#uses_measurement_unit
+eo:uses_measurement_unit rdf:type owl:ObjectProperty ;
+                         rdfs:label "uses measurement unit" ;
+                         skos:definition "A relation between an Information Content Entity and the Measurement Unit that describes the magnitude of the physical quantity it represents." .
+
+
+#################################################################
+#    Data properties
+#################################################################
+
+###  https://test.org/eo/p3#has_measurement_value
+eo:has_measurement_value rdf:type owl:DatatypeProperty ;
+                         rdfs:subPropertyOf owl:topDataProperty ;
+                         rdfs:range xsd:decimal ;
+                         rdfs:label "has measurement value" ;
+                         skos:definition "The numeric value associated with a measurement or design datum." .
+
+
+#################################################################
+#    Classes
+#################################################################
+
+###  https://test.org/eo/p3#Aircraft
+eo:Aircraft rdf:type owl:Class ;
+            rdfs:subClassOf obo:BFO_0000040 ;
+            rdfs:label "Aircraft" ;
+            skos:definition "A material entity designed to convey passengers, cargo, or equipment by air travel." .
+
+
+###  https://test.org/eo/p3#Aircraft_Design
+eo:Aircraft_Design rdf:type owl:Class ;
+                   rdfs:subClassOf obo:BFO_0000031 ;
+                   rdfs:label "Aircraft Design" ;
+                   skos:definition "A generically dependent continuant that is a design specification for an aircraft." .
+
+
+###  https://test.org/eo/p3#Average_Maximum_Knot
+eo:Average_Maximum_Knot rdf:type owl:Class ;
+                        rdfs:subClassOf eo:Measurement ;
+                        rdfs:label "Average Maximum Knot" ;
+                        skos:definition "A Measurement that records the average of the maximum approach speeds, in knots, obtained across a set of approaches." .
+
+
+###  https://test.org/eo/p3#Knot
+eo:Knot rdf:type owl:Class ;
+        rdfs:subClassOf eo:Measurement_Unit ;
+        rdfs:label "Knot" ;
+        skos:definition "A unit of speed equal to one nautical mile per hour." .
+
+
+###  https://test.org/eo/p3#MaxSpeed
+eo:MaxSpeed rdf:type owl:Class ;
+            rdfs:subClassOf eo:Aircraft_Design ;
+            rdfs:label "MaxSpeed" ;
+            skos:definition "An Aircraft Design that specifies the designed maximum approach speed of an aircraft type." .
+
+
+###  https://test.org/eo/p3#Measurement
+eo:Measurement rdf:type owl:Class ;
+               rdfs:subClassOf obo:BFO_0000031 ;
+               rdfs:label "Measurement" ;
+               skos:definition "A generically dependent continuant that is the informational output of a measuring or testing process." .
+
+
+###  https://test.org/eo/p3#Measurement_Unit
+eo:Measurement_Unit rdf:type owl:Class ;
+                    rdfs:subClassOf obo:BFO_0000031 ;
+                    rdfs:label "Measurement Unit" ;
+                    skos:definition "A standard unit used for measurement." .
+
+
+#################################################################
+#    Individuals
+#################################################################
+
+###  https://test.org/eo/p3#A321-111
+eo:A321-111 rdf:type owl:NamedIndividual ,
+                     eo:Aircraft ;
+            rdfs:label "A321-111" ;
+            skos:definition "An instance of the Airbus A321-111 aircraft type." .
+
+
+###  https://test.org/eo/p3#AverageMaximumKnot_139
+eo:AverageMaximumKnot_139 rdf:type owl:NamedIndividual ,
+                                   eo:Average_Maximum_Knot ;
+                          eo:is_about eo:A321-111 ;
+                          eo:uses_measurement_unit eo:Knot_1 ;
+                          eo:has_measurement_value 139 ;
+                          rdfs:label "AverageMaximumKnot_139" ;
+                          skos:definition "The average maximum approach speed obtained by this instance of the A321-111 across 5 approaches, 139 knots." .
+
+
+###  https://test.org/eo/p3#Knot_1
+eo:Knot_1 rdf:type owl:NamedIndividual ,
+                   eo:Knot ;
+          rdfs:label "knot" .
+
+
+###  https://test.org/eo/p3#MaxSpeed_142
+eo:MaxSpeed_142 rdf:type owl:NamedIndividual ,
+                         eo:MaxSpeed ;
+                eo:is_about eo:A321-111 ;
+                eo:uses_measurement_unit eo:Knot_1 ;
+                eo:has_measurement_value 142 ;
+                rdfs:label "MaxSpeed_142" ;
+                skos:definition "The designed maximum approach speed of the A321-111, 142 knots." .
+
+
+###  Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi

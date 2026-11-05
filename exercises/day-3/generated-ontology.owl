@@ -1,0 +1,1063 @@
+# =====================================================================
+# Vehicle and Vehicle Manufacturer Ontology (VMO)
+# OWL 2 DL — Turtle serialization
+#
+# Upper-level ontology: Basic Formal Ontology (BFO) 2020
+# Mid-level support:    Relation Ontology (RO), Information Artifact
+#                       Ontology (IAO)
+#
+# Competency questions this ontology is built to answer:
+#   CQ1. What type(s) of vehicle does each manufacturer make?
+#   CQ2. Where (facility / state / country) is each vehicle made?
+#   CQ3. Which vehicle models are most popular per capita in the
+#        United States (nationally and by state)?
+#
+# MODELING NOTES
+# --------------
+# * Vehicles are BFO:object. Vehicle *types* (e.g. Toyota RAV4) are OWL
+#   classes whose instances are physical vehicles bearing VINs.
+# * Manufacturers are BFO:object aggregate (an organization is an
+#   aggregate of agents), bearing a Manufacturer Role (BFO:role) that is
+#   realized in a Vehicle Manufacturing Process (BFO:process).
+# * Manufacturing facilities are BFO:object; geopolitical regions are
+#   BFO:site.
+# * Popularity statistics are NOT qualities of vehicles. They are
+#   Information Content Entities (BFO:generically dependent continuant)
+#   that are *about* a model and *pertain to* a region. This keeps the
+#   ontology honest: a registration rate is a datum, not a physical
+#   property of a car.
+# * OWL 2 DL punning is used deliberately: each model IRI (e.g. :FordF150)
+#   denotes BOTH a class (the set of physical F-150s) AND an individual
+#   (the model specification the statistics are about). This is legal
+#   OWL 2 DL and keeps SPARQL over the statistics simple.
+#
+# DATA PROVENANCE WARNING
+# -----------------------
+# All registration counts, populations and per-capita rates below are
+# ILLUSTRATIVE PLACEHOLDERS included to demonstrate the modeling pattern.
+# Replace them with licensed figures (e.g. S&P Global Mobility / Experian
+# vehicles-in-operation data + U.S. Census Bureau population estimates)
+# before using this ontology for analysis. Each measurement individual
+# carries a :hasDataProvenanceNote annotation.
+# =====================================================================
+
+@prefix :        <https://example.org/ontology/vmo#> .
+@prefix vmo:     <https://example.org/ontology/vmo#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix obo:     <http://purl.obolibrary.org/obo/> .
+
+# =====================================================================
+# 1. ONTOLOGY HEADER AND IMPORTS
+# =====================================================================
+
+<https://example.org/ontology/vmo> a owl:Ontology ;
+    dcterms:title "Vehicle and Vehicle Manufacturer Ontology (VMO)"@en ;
+    dcterms:description """A BFO-2020-conformant domain ontology covering vehicles, the
+organizations that manufacture them, the facilities and geopolitical regions in which they are
+assembled, and per-capita adoption statistics for the United States."""@en ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    owl:versionIRI <https://example.org/ontology/vmo/2026-08-05> ;
+    owl:versionInfo "1.0.0" ;
+
+    # --- REQUIRED IMPORTS -------------------------------------------
+    # Basic Formal Ontology 2020 — ISO/IEC 21838-2 upper level.
+    owl:imports <http://purl.obolibrary.org/obo/bfo.owl> ;
+    # Relation Ontology — supplies located in, has output, bearer of, etc.
+    owl:imports <http://purl.obolibrary.org/obo/ro.owl> ;
+    # Information Artifact Ontology — supplies information content entity,
+    # is about, measurement datum, and the definition annotation properties.
+    owl:imports <http://purl.obolibrary.org/obo/iao.owl> .
+
+# --- OPTIONAL IMPORTS (uncomment as needed) --------------------------
+# Common Core Ontologies (BFO-based mid-level; has Vehicle, Organization,
+#   ManufacturingFacility, GeospatialRegion — align VMO classes to CCO if
+#   you need interoperability with the CCO/BFO ecosystem):
+#   owl:imports <https://www.commoncoreontologies.org/ArtifactOntology> ;
+#   owl:imports <https://www.commoncoreontologies.org/AgentOntology> ;
+#   owl:imports <https://www.commoncoreontologies.org/GeospatialOntology> ;
+# Units of Measurement Ontology (if you want typed unit individuals):
+#   owl:imports <http://purl.obolibrary.org/obo/uo.owl> ;
+# Gazetteer (authoritative geopolitical individuals; very large file):
+#   owl:imports <http://purl.obolibrary.org/obo/gaz.owl> ;
+
+# =====================================================================
+# 2. IMPORTED TERMS — declared here so the file parses stand-alone
+#    (declarations merge harmlessly with the imported ontologies)
+# =====================================================================
+
+obo:BFO_0000001 a owl:Class ; rdfs:label "entity" .
+obo:BFO_0000002 a owl:Class ; rdfs:label "continuant" .
+obo:BFO_0000003 a owl:Class ; rdfs:label "occurrent" .
+obo:BFO_0000004 a owl:Class ; rdfs:label "independent continuant" .
+obo:BFO_0000015 a owl:Class ; rdfs:label "process" .
+obo:BFO_0000016 a owl:Class ; rdfs:label "disposition" .
+obo:BFO_0000017 a owl:Class ; rdfs:label "realizable entity" .
+obo:BFO_0000019 a owl:Class ; rdfs:label "quality" .
+obo:BFO_0000020 a owl:Class ; rdfs:label "specifically dependent continuant" .
+obo:BFO_0000023 a owl:Class ; rdfs:label "role" .
+obo:BFO_0000024 a owl:Class ; rdfs:label "fiat object part" .
+obo:BFO_0000027 a owl:Class ; rdfs:label "object aggregate" .
+obo:BFO_0000029 a owl:Class ; rdfs:label "site" .
+obo:BFO_0000030 a owl:Class ; rdfs:label "object" .
+obo:BFO_0000031 a owl:Class ; rdfs:label "generically dependent continuant" .
+obo:BFO_0000034 a owl:Class ; rdfs:label "function" .
+obo:BFO_0000040 a owl:Class ; rdfs:label "material entity" .
+obo:IAO_0000030 a owl:Class ; rdfs:label "information content entity" .
+
+obo:BFO_0000050 a owl:ObjectProperty ; rdfs:label "part of" .
+obo:BFO_0000051 a owl:ObjectProperty ; rdfs:label "has part" .
+obo:BFO_0000054 a owl:ObjectProperty ; rdfs:label "realized in" .
+obo:BFO_0000055 a owl:ObjectProperty ; rdfs:label "realizes" .
+obo:BFO_0000056 a owl:ObjectProperty ; rdfs:label "participates in" .
+obo:BFO_0000057 a owl:ObjectProperty ; rdfs:label "has participant" .
+obo:BFO_0000066 a owl:ObjectProperty ; rdfs:label "occurs in" .
+obo:RO_0000052  a owl:ObjectProperty ; rdfs:label "characteristic of (inheres in)" .
+obo:RO_0000053  a owl:ObjectProperty ; rdfs:label "bearer of" .
+obo:RO_0001025  a owl:ObjectProperty ; rdfs:label "located in" .
+obo:RO_0002234  a owl:ObjectProperty ; rdfs:label "has output" .
+obo:RO_0002215  a owl:ObjectProperty ; rdfs:label "capable of" .
+obo:IAO_0000136 a owl:ObjectProperty ; rdfs:label "is about" .
+
+obo:IAO_0000115 a owl:AnnotationProperty ; rdfs:label "definition" .
+obo:IAO_0000116 a owl:AnnotationProperty ; rdfs:label "editor note" .
+obo:IAO_0000119 a owl:AnnotationProperty ; rdfs:label "definition source" .
+
+# =====================================================================
+# 3. LOCAL ANNOTATION PROPERTIES
+# =====================================================================
+
+:hasDataProvenanceNote a owl:AnnotationProperty ;
+    rdfs:label "has data provenance note"@en ;
+    obo:IAO_0000115 "Free-text note recording the source, vintage and reliability of an asserted datum."@en .
+
+# =====================================================================
+# 4. INDEPENDENT CONTINUANTS — MATERIAL ENTITIES
+# =====================================================================
+
+# ---- 4.1 Vehicles ---------------------------------------------------
+
+:Vehicle a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000030 ;
+    rdfs:label "Vehicle"@en ;
+    obo:IAO_0000115 "An object that is the output of a manufacturing process and that has the function of transporting persons or cargo from one location to another."@en ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty obo:RO_0000053 ;
+        owl:someValuesFrom :TransportationFunction ] .
+
+:MotorVehicle a owl:Class ;
+    rdfs:subClassOf :Vehicle ;
+    rdfs:label "Motor Vehicle"@en ;
+    obo:IAO_0000115 "A vehicle that has as part a propulsion unit that supplies the motive power for its locomotion, and that is designed for operation on roads."@en ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty obo:BFO_0000051 ;
+        owl:someValuesFrom :PropulsionUnit ] .
+
+:Automobile a owl:Class ;
+    rdfs:subClassOf :MotorVehicle ;
+    rdfs:label "Automobile"@en ;
+    skos:altLabel "Passenger Car"@en ;
+    obo:IAO_0000115 "A motor vehicle whose primary function is the transportation of a small number of passengers, having an enclosed passenger cabin and an integrated (non-open) cargo area."@en .
+
+:Sedan a owl:Class ; rdfs:subClassOf :Automobile ; rdfs:label "Sedan"@en .
+:Coupe a owl:Class ; rdfs:subClassOf :Automobile ; rdfs:label "Coupe"@en .
+:Hatchback a owl:Class ; rdfs:subClassOf :Automobile ; rdfs:label "Hatchback"@en .
+:StationWagon a owl:Class ; rdfs:subClassOf :Automobile ; rdfs:label "Station Wagon"@en .
+:Convertible a owl:Class ; rdfs:subClassOf :Automobile ; rdfs:label "Convertible"@en .
+
+:SportUtilityVehicle a owl:Class ;
+    rdfs:subClassOf :MotorVehicle ;
+    rdfs:label "Sport Utility Vehicle"@en ;
+    skos:altLabel "SUV"@en ;
+    obo:IAO_0000115 "A motor vehicle with an elevated ride height and an enclosed unified passenger and cargo compartment, functioning to transport passengers and cargo over both paved and unpaved surfaces."@en .
+
+:CrossoverUtilityVehicle a owl:Class ;
+    rdfs:subClassOf :SportUtilityVehicle ;
+    rdfs:label "Crossover Utility Vehicle"@en ;
+    obo:IAO_0000115 "A sport utility vehicle built on a unibody (rather than body-on-frame) chassis."@en .
+
+:CompactSportUtilityVehicle a owl:Class ; rdfs:subClassOf :SportUtilityVehicle ; rdfs:label "Compact Sport Utility Vehicle"@en .
+:MidsizeSportUtilityVehicle a owl:Class ; rdfs:subClassOf :SportUtilityVehicle ; rdfs:label "Midsize Sport Utility Vehicle"@en .
+:FullSizeSportUtilityVehicle a owl:Class ; rdfs:subClassOf :SportUtilityVehicle ; rdfs:label "Full-Size Sport Utility Vehicle"@en .
+
+:PickupTruck a owl:Class ;
+    rdfs:label "Pickup Truck"@en ;
+    obo:IAO_0000115 "A motor vehicle having as fiat part an open cargo bed separated from the passenger cabin."@en ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( :MotorVehicle
+                             [ a owl:Restriction ;
+                               owl:onProperty obo:BFO_0000051 ;
+                               owl:someValuesFrom :OpenCargoBed ] ) ] .
+
+:LightDutyPickupTruck a owl:Class ; rdfs:subClassOf :PickupTruck ; rdfs:label "Light-Duty Pickup Truck"@en .
+:MidsizePickupTruck a owl:Class ; rdfs:subClassOf :PickupTruck ; rdfs:label "Midsize Pickup Truck"@en .
+:HeavyDutyPickupTruck a owl:Class ; rdfs:subClassOf :PickupTruck ; rdfs:label "Heavy-Duty Pickup Truck"@en .
+
+:Van a owl:Class ; rdfs:subClassOf :MotorVehicle ; rdfs:label "Van"@en .
+:Minivan a owl:Class ; rdfs:subClassOf :Van ; rdfs:label "Minivan"@en .
+:CargoVan a owl:Class ; rdfs:subClassOf :Van ; rdfs:label "Cargo Van"@en .
+
+:Motorcycle a owl:Class ; rdfs:subClassOf :MotorVehicle ; rdfs:label "Motorcycle"@en .
+:Bus a owl:Class ; rdfs:subClassOf :MotorVehicle ; rdfs:label "Bus"@en .
+:CommercialTruck a owl:Class ; rdfs:subClassOf :MotorVehicle ; rdfs:label "Commercial Truck"@en .
+
+[] a owl:AllDisjointClasses ;
+   owl:members ( :Automobile :SportUtilityVehicle :PickupTruck :Van :Motorcycle :Bus :CommercialTruck ) .
+
+# ---- 4.2 Powertrain-defined vehicle classes (inferred by reasoner) ---
+
+:BatteryElectricVehicle a owl:Class ;
+    rdfs:label "Battery Electric Vehicle"@en ;
+    skos:altLabel "BEV"@en ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( :MotorVehicle
+                             [ a owl:Restriction ; owl:onProperty obo:BFO_0000051 ; owl:someValuesFrom :TractionBattery ]
+                             [ a owl:Restriction ; owl:onProperty obo:BFO_0000051 ; owl:someValuesFrom :ElectricTractionMotor ]
+                             [ a owl:Class ; owl:complementOf
+                               [ a owl:Restriction ; owl:onProperty obo:BFO_0000051 ; owl:someValuesFrom :InternalCombustionEngine ] ] ) ] .
+
+:HybridElectricVehicle a owl:Class ;
+    rdfs:label "Hybrid Electric Vehicle"@en ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( :MotorVehicle
+                             [ a owl:Restriction ; owl:onProperty obo:BFO_0000051 ; owl:someValuesFrom :InternalCombustionEngine ]
+                             [ a owl:Restriction ; owl:onProperty obo:BFO_0000051 ; owl:someValuesFrom :ElectricTractionMotor ] ) ] .
+
+:InternalCombustionVehicle a owl:Class ;
+    rdfs:label "Internal Combustion Vehicle"@en ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( :MotorVehicle
+                             [ a owl:Restriction ; owl:onProperty obo:BFO_0000051 ; owl:someValuesFrom :InternalCombustionEngine ]
+                             [ a owl:Class ; owl:complementOf
+                               [ a owl:Restriction ; owl:onProperty obo:BFO_0000051 ; owl:someValuesFrom :ElectricTractionMotor ] ] ) ] .
+
+:FuelCellElectricVehicle a owl:Class ;
+    rdfs:label "Fuel Cell Electric Vehicle"@en ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( :MotorVehicle
+                             [ a owl:Restriction ; owl:onProperty obo:BFO_0000051 ; owl:someValuesFrom :FuelCellStack ] ) ] .
+
+# ---- 4.3 Vehicle components ----------------------------------------
+
+:VehicleComponent a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000030 ;
+    rdfs:label "Vehicle Component"@en ;
+    obo:IAO_0000115 "An object that is designed to be a part of a vehicle."@en .
+
+:PropulsionUnit a owl:Class ; rdfs:subClassOf :VehicleComponent ; rdfs:label "Propulsion Unit"@en .
+:InternalCombustionEngine a owl:Class ; rdfs:subClassOf :PropulsionUnit ; rdfs:label "Internal Combustion Engine"@en .
+:ElectricTractionMotor a owl:Class ; rdfs:subClassOf :PropulsionUnit ; rdfs:label "Electric Traction Motor"@en .
+:FuelCellStack a owl:Class ; rdfs:subClassOf :VehicleComponent ; rdfs:label "Fuel Cell Stack"@en .
+:TractionBattery a owl:Class ; rdfs:subClassOf :VehicleComponent ; rdfs:label "Traction Battery"@en .
+:Chassis a owl:Class ; rdfs:subClassOf :VehicleComponent ; rdfs:label "Chassis"@en .
+:UnibodyChassis a owl:Class ; rdfs:subClassOf :Chassis ; rdfs:label "Unibody Chassis"@en .
+:BodyOnFrameChassis a owl:Class ; rdfs:subClassOf :Chassis ; rdfs:label "Body-on-Frame Chassis"@en .
+
+:PassengerCabin a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000024 ;
+    rdfs:label "Passenger Cabin"@en ;
+    obo:IAO_0000115 "A fiat object part of a vehicle that is bounded by the vehicle body and functions to contain seated occupants."@en .
+
+:OpenCargoBed a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000024 ;
+    rdfs:label "Open Cargo Bed"@en ;
+    obo:IAO_0000115 "A fiat object part of a vehicle consisting of an uncovered load-bearing platform bounded by side walls and a tailgate, physically separated from the passenger cabin."@en .
+
+:CrossoverUtilityVehicle rdfs:subClassOf [ a owl:Restriction ;
+    owl:onProperty obo:BFO_0000051 ; owl:someValuesFrom :UnibodyChassis ] .
+
+# ---- 4.4 Organizations ---------------------------------------------
+
+:Organization a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000027 ;
+    rdfs:label "Organization"@en ;
+    obo:IAO_0000115 "An object aggregate whose member parts are persons who bear roles that are realized in processes carried out to achieve the objectives of the aggregate."@en .
+
+:CommercialOrganization a owl:Class ;
+    rdfs:subClassOf :Organization ;
+    rdfs:label "Commercial Organization"@en .
+
+:VehicleManufacturer a owl:Class ;
+    rdfs:subClassOf :CommercialOrganization ;
+    rdfs:label "Vehicle Manufacturer"@en ;
+    obo:IAO_0000115 "A commercial organization that bears a manufacturer role realized in vehicle manufacturing processes that have vehicles as output."@en ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty obo:RO_0000053 ;
+        owl:someValuesFrom :VehicleManufacturerRole ] .
+
+:AutomotiveBrandDivision a owl:Class ;
+    rdfs:subClassOf :Organization ;
+    rdfs:label "Automotive Brand Division"@en ;
+    obo:IAO_0000115 "An organization that is a proper part of a vehicle manufacturer and under whose marque a subset of that manufacturer's vehicles is marketed."@en .
+
+# ---- 4.5 Facilities -------------------------------------------------
+
+:ManufacturingFacility a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000030 ;
+    rdfs:label "Manufacturing Facility"@en ;
+    obo:IAO_0000115 "An object designed to house and support manufacturing processes."@en .
+
+:VehicleAssemblyPlant a owl:Class ;
+    rdfs:subClassOf :ManufacturingFacility ;
+    rdfs:label "Vehicle Assembly Plant"@en ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty obo:RO_0002215 ;
+        owl:someValuesFrom :VehicleAssemblyProcess ] .
+
+:PowertrainPlant a owl:Class ;
+    rdfs:subClassOf :ManufacturingFacility ;
+    rdfs:label "Powertrain Plant"@en ;
+    obo:IAO_0000116 "Retained for extension: facilities producing engines, batteries and transmissions."@en .
+
+# =====================================================================
+# 5. IMMATERIAL ENTITIES — SITES AND GEOPOLITICAL REGIONS
+# =====================================================================
+
+:GeopoliticalRegion a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000029 ;
+    rdfs:label "Geopolitical Region"@en ;
+    obo:IAO_0000115 "A site whose boundaries are determined by a political entity with jurisdiction over it."@en .
+
+:Country a owl:Class ; rdfs:subClassOf :GeopoliticalRegion ; rdfs:label "Country"@en .
+:StateOrProvince a owl:Class ; rdfs:subClassOf :GeopoliticalRegion ; rdfs:label "State or Province"@en .
+:City a owl:Class ; rdfs:subClassOf :GeopoliticalRegion ; rdfs:label "City"@en .
+
+# =====================================================================
+# 6. REALIZABLE ENTITIES — ROLES, FUNCTIONS, DISPOSITIONS
+# =====================================================================
+
+:VehicleManufacturerRole a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000023 ;
+    rdfs:label "Vehicle Manufacturer Role"@en ;
+    obo:IAO_0000115 "A role borne by an organization that is realized in vehicle manufacturing processes."@en ;
+    rdfs:subClassOf [ a owl:Restriction ;
+        owl:onProperty obo:BFO_0000054 ;
+        owl:someValuesFrom :VehicleManufacturingProcess ] .
+
+:VehicleOwnerRole a owl:Class ; rdfs:subClassOf obo:BFO_0000023 ; rdfs:label "Vehicle Owner Role"@en .
+
+:TransportationFunction a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000034 ;
+    rdfs:label "Transportation Function"@en ;
+    obo:IAO_0000115 "A function borne by a material entity that is realized in a process of moving persons or cargo from one location to another."@en .
+
+:PassengerTransportationFunction a owl:Class ; rdfs:subClassOf :TransportationFunction ; rdfs:label "Passenger Transportation Function"@en .
+:CargoTransportationFunction a owl:Class ; rdfs:subClassOf :TransportationFunction ; rdfs:label "Cargo Transportation Function"@en .
+
+:OffRoadCapability a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000016 ;
+    rdfs:label "Off-Road Capability"@en ;
+    obo:IAO_0000115 "A disposition of a vehicle to traverse unpaved terrain without loss of function."@en .
+
+# =====================================================================
+# 7. OCCURRENTS — PROCESSES
+# =====================================================================
+
+:VehicleManufacturingProcess a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000015 ;
+    rdfs:label "Vehicle Manufacturing Process"@en ;
+    obo:IAO_0000115 "A planned process that has a vehicle manufacturer as participant, occurs in a manufacturing facility, and has a vehicle as output."@en ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty obo:RO_0002234 ; owl:someValuesFrom :Vehicle ] ,
+                    [ a owl:Restriction ; owl:onProperty obo:BFO_0000057 ; owl:someValuesFrom :VehicleManufacturer ] ,
+                    [ a owl:Restriction ; owl:onProperty obo:BFO_0000066 ; owl:someValuesFrom :ManufacturingFacility ] .
+
+:VehicleAssemblyProcess a owl:Class ;
+    rdfs:subClassOf :VehicleManufacturingProcess ;
+    rdfs:label "Vehicle Assembly Process"@en .
+
+:VehicleRegistrationProcess a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000015 ;
+    rdfs:label "Vehicle Registration Process"@en ;
+    obo:IAO_0000115 "A process in which a governmental body records a vehicle as licensed for road use within a geopolitical region."@en .
+
+# =====================================================================
+# 8. GENERICALLY DEPENDENT CONTINUANTS — INFORMATION ENTITIES
+# =====================================================================
+
+:VehicleModelSpecification a owl:Class ;
+    rdfs:subClassOf obo:IAO_0000030 ;
+    rdfs:label "Vehicle Model Specification"@en ;
+    obo:IAO_0000115 "An information content entity that prescribes the design of a class of vehicles marketed under a single model designation."@en .
+
+:Marque a owl:Class ;
+    rdfs:subClassOf obo:IAO_0000030 ;
+    rdfs:label "Marque"@en ;
+    obo:IAO_0000115 "An information content entity that designates the brand under which a manufacturer markets vehicles."@en .
+
+:MeasurementDatum a owl:Class ;
+    rdfs:subClassOf obo:IAO_0000030 ;
+    rdfs:label "Measurement Datum"@en ;
+    obo:IAO_0000115 "An information content entity that is the output of a measurement process and is about some entity."@en .
+
+:VehicleRegistrationCountDatum a owl:Class ;
+    rdfs:subClassOf :MeasurementDatum ;
+    rdfs:label "Vehicle Registration Count Datum"@en ;
+    obo:IAO_0000115 "A measurement datum recording the number of vehicles of a given model registered within a geopolitical region during a specified year."@en .
+
+:PerCapitaAdoptionRateDatum a owl:Class ;
+    rdfs:subClassOf :MeasurementDatum ;
+    rdfs:label "Per Capita Adoption Rate Datum"@en ;
+    obo:IAO_0000115 "A measurement datum recording the ratio of registered vehicles of a given model to the resident population of a geopolitical region, expressed per one thousand persons."@en ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty :pertainsToRegion ; owl:someValuesFrom :GeopoliticalRegion ] .
+
+# --- Defined class: high per-capita adoption in the United States ----
+# Uses an OWL 2 datatype facet so a reasoner can classify measurements.
+
+:HighPerCapitaAdoptionInUnitedStates a owl:Class ;
+    rdfs:label "High Per Capita Adoption Datum (United States)"@en ;
+    obo:IAO_0000115 "A per capita adoption rate datum pertaining to the United States whose value is at least 2.0 registered vehicles per one thousand residents."@en ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( :PerCapitaAdoptionRateDatum
+                             [ a owl:Restriction ; owl:onProperty :pertainsToRegion ; owl:hasValue :UnitedStatesOfAmerica ]
+                             [ a owl:Restriction ; owl:onProperty :hasVehiclesPerThousandPersons ;
+                               owl:someValuesFrom [ a rdfs:Datatype ;
+                                   owl:onDatatype xsd:decimal ;
+                                   owl:withRestrictions ( [ xsd:minInclusive "2.0"^^xsd:decimal ] ) ] ] ) ] .
+
+# =====================================================================
+# 9. OBJECT PROPERTIES
+# =====================================================================
+
+:manufacturedBy a owl:ObjectProperty ;
+    rdfs:label "manufactured by"@en ;
+    rdfs:domain :Vehicle ; rdfs:range :VehicleManufacturer ;
+    owl:inverseOf :manufactures ;
+    obo:IAO_0000115 "Relates a vehicle to the organization that participated in the manufacturing process having that vehicle as output. Relational shortcut for the process-based pattern."@en .
+
+:manufactures a owl:ObjectProperty ;
+    rdfs:label "manufactures"@en ;
+    rdfs:domain :VehicleManufacturer ; rdfs:range :Vehicle .
+
+:producesModel a owl:ObjectProperty ;
+    rdfs:label "produces model"@en ;
+    rdfs:domain :VehicleManufacturer ; rdfs:range :VehicleModelSpecification ;
+    owl:inverseOf :modelProducedBy ;
+    obo:IAO_0000115 "Relates a manufacturer to a model specification it puts into production. (Answers CQ1 at the type level.)"@en .
+
+:modelProducedBy a owl:ObjectProperty ; rdfs:label "model produced by"@en .
+
+:hasDivision a owl:ObjectProperty ;
+    rdfs:label "has division"@en ;
+    rdfs:subPropertyOf obo:BFO_0000051 ;
+    rdfs:domain :Organization ; rdfs:range :AutomotiveBrandDivision .
+
+:operatesFacility a owl:ObjectProperty ;
+    rdfs:label "operates facility"@en ;
+    rdfs:domain :Organization ; rdfs:range :ManufacturingFacility .
+
+:assembledAtFacility a owl:ObjectProperty ;
+    rdfs:label "assembled at facility"@en ;
+    rdfs:range :ManufacturingFacility ;
+    obo:IAO_0000115 "Relates a vehicle (or model specification) to the facility in which its assembly process occurs. (Answers CQ2.)"@en .
+
+:facilityLocatedIn a owl:ObjectProperty ;
+    rdfs:label "facility located in"@en ;
+    rdfs:subPropertyOf obo:RO_0001025 ;
+    rdfs:domain :ManufacturingFacility ; rdfs:range :GeopoliticalRegion .
+
+:regionPartOf a owl:ObjectProperty , owl:TransitiveProperty ;
+    rdfs:label "region part of"@en ;
+    rdfs:subPropertyOf obo:BFO_0000050 ;
+    rdfs:domain :GeopoliticalRegion ; rdfs:range :GeopoliticalRegion .
+
+# City -> State -> Country propagation for facility location.
+:facilityLocatedIn owl:propertyChainAxiom ( :facilityLocatedIn :regionPartOf ) .
+
+:assembledInRegion a owl:ObjectProperty ;
+    rdfs:label "assembled in region"@en ;
+    rdfs:range :GeopoliticalRegion ;
+    obo:IAO_0000115 "Inferred from the facility of assembly and that facility's location."@en ;
+    owl:propertyChainAxiom ( :assembledAtFacility :facilityLocatedIn ) .
+
+:manufacturesInRegion a owl:ObjectProperty ;
+    rdfs:label "manufactures in region"@en ;
+    rdfs:domain :VehicleManufacturer ; rdfs:range :GeopoliticalRegion ;
+    owl:propertyChainAxiom ( :producesModel :assembledAtFacility :facilityLocatedIn ) .
+
+:headquarteredIn a owl:ObjectProperty ;
+    rdfs:label "headquartered in"@en ;
+    rdfs:domain :Organization ; rdfs:range :GeopoliticalRegion .
+
+:conformsToModel a owl:ObjectProperty ;
+    rdfs:label "conforms to model"@en ;
+    rdfs:domain :Vehicle ; rdfs:range :VehicleModelSpecification .
+
+:hasMarque a owl:ObjectProperty ;
+    rdfs:label "has marque"@en ;
+    rdfs:range :Marque .
+
+:pertainsToRegion a owl:ObjectProperty ;
+    rdfs:label "pertains to region"@en ;
+    rdfs:domain :MeasurementDatum ; rdfs:range :GeopoliticalRegion .
+
+:isAboutModel a owl:ObjectProperty ;
+    rdfs:label "is about model"@en ;
+    rdfs:subPropertyOf obo:IAO_0000136 ;
+    rdfs:domain :MeasurementDatum ; rdfs:range :VehicleModelSpecification .
+
+# =====================================================================
+# 10. DATA PROPERTIES
+# =====================================================================
+
+:hasVehicleIdentificationNumber a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "has vehicle identification number"@en ;
+    rdfs:domain :Vehicle ; rdfs:range xsd:string .
+
+:hasModelYear a owl:DatatypeProperty ; rdfs:label "has model year"@en ; rdfs:range xsd:gYear .
+:hasSeatingCapacity a owl:DatatypeProperty ; rdfs:label "has seating capacity"@en ; rdfs:range xsd:nonNegativeInteger .
+:hasCurbWeightInKilograms a owl:DatatypeProperty ; rdfs:label "has curb weight in kilograms"@en ; rdfs:range xsd:decimal .
+:hasBaseMSRPInUSDollars a owl:DatatypeProperty ; rdfs:label "has base MSRP in US dollars"@en ; rdfs:range xsd:decimal .
+:hasModelDesignation a owl:DatatypeProperty ; rdfs:label "has model designation"@en ; rdfs:range xsd:string .
+
+:hasRegistrationCount a owl:DatatypeProperty ;
+    rdfs:label "has registration count"@en ;
+    rdfs:domain :MeasurementDatum ; rdfs:range xsd:nonNegativeInteger .
+
+:hasReferencePopulationCount a owl:DatatypeProperty ;
+    rdfs:label "has reference population count"@en ;
+    rdfs:domain :MeasurementDatum ; rdfs:range xsd:nonNegativeInteger .
+
+:hasVehiclesPerThousandPersons a owl:DatatypeProperty ;
+    rdfs:label "has vehicles per thousand persons"@en ;
+    rdfs:domain :PerCapitaAdoptionRateDatum ; rdfs:range xsd:decimal ;
+    obo:IAO_0000115 "The quotient of registration count and reference population, multiplied by 1000. (Answers CQ3.)"@en .
+
+:hasMeasurementYear a owl:DatatypeProperty ;
+    rdfs:label "has measurement year"@en ;
+    rdfs:domain :MeasurementDatum ; rdfs:range xsd:gYear .
+
+:hasNationalPerCapitaRank a owl:DatatypeProperty ;
+    rdfs:label "has national per capita rank"@en ;
+    rdfs:domain :MeasurementDatum ; rdfs:range xsd:positiveInteger .
+
+# =====================================================================
+# 11. INDIVIDUALS — GEOPOLITICAL REGIONS
+# =====================================================================
+
+:UnitedStatesOfAmerica a owl:NamedIndividual , :Country ; rdfs:label "United States of America"@en .
+:Canada a owl:NamedIndividual , :Country ; rdfs:label "Canada"@en .
+:Mexico a owl:NamedIndividual , :Country ; rdfs:label "Mexico"@en .
+:Japan a owl:NamedIndividual , :Country ; rdfs:label "Japan"@en .
+:SouthKorea a owl:NamedIndividual , :Country ; rdfs:label "South Korea"@en .
+:Germany a owl:NamedIndividual , :Country ; rdfs:label "Germany"@en .
+
+:Michigan a owl:NamedIndividual , :StateOrProvince ; rdfs:label "Michigan"@en ; :regionPartOf :UnitedStatesOfAmerica .
+:Kentucky a owl:NamedIndividual , :StateOrProvince ; rdfs:label "Kentucky"@en ; :regionPartOf :UnitedStatesOfAmerica .
+:Ohio a owl:NamedIndividual , :StateOrProvince ; rdfs:label "Ohio"@en ; :regionPartOf :UnitedStatesOfAmerica .
+:Indiana a owl:NamedIndividual , :StateOrProvince ; rdfs:label "Indiana"@en ; :regionPartOf :UnitedStatesOfAmerica .
+:Tennessee a owl:NamedIndividual , :StateOrProvince ; rdfs:label "Tennessee"@en ; :regionPartOf :UnitedStatesOfAmerica .
+:Texas a owl:NamedIndividual , :StateOrProvince ; rdfs:label "Texas"@en ; :regionPartOf :UnitedStatesOfAmerica .
+:California a owl:NamedIndividual , :StateOrProvince ; rdfs:label "California"@en ; :regionPartOf :UnitedStatesOfAmerica .
+:Alabama a owl:NamedIndividual , :StateOrProvince ; rdfs:label "Alabama"@en ; :regionPartOf :UnitedStatesOfAmerica .
+:SouthCarolina a owl:NamedIndividual , :StateOrProvince ; rdfs:label "South Carolina"@en ; :regionPartOf :UnitedStatesOfAmerica .
+:Georgia a owl:NamedIndividual , :StateOrProvince ; rdfs:label "Georgia"@en ; :regionPartOf :UnitedStatesOfAmerica .
+:Missouri a owl:NamedIndividual , :StateOrProvince ; rdfs:label "Missouri"@en ; :regionPartOf :UnitedStatesOfAmerica .
+:Vermont a owl:NamedIndividual , :StateOrProvince ; rdfs:label "Vermont"@en ; :regionPartOf :UnitedStatesOfAmerica .
+:Colorado a owl:NamedIndividual , :StateOrProvince ; rdfs:label "Colorado"@en ; :regionPartOf :UnitedStatesOfAmerica .
+:Ontario a owl:NamedIndividual , :StateOrProvince ; rdfs:label "Ontario"@en ; :regionPartOf :Canada .
+:Guanajuato a owl:NamedIndividual , :StateOrProvince ; rdfs:label "Guanajuato"@en ; :regionPartOf :Mexico .
+
+# =====================================================================
+# 12. INDIVIDUALS — MANUFACTURERS AND BRAND DIVISIONS
+# =====================================================================
+
+:FordMotorCompany a owl:NamedIndividual , :VehicleManufacturer ;
+    rdfs:label "Ford Motor Company"@en ; :headquarteredIn :Michigan .
+
+:GeneralMotorsCompany a owl:NamedIndividual , :VehicleManufacturer ;
+    rdfs:label "General Motors Company"@en ; :headquarteredIn :Michigan ;
+    :hasDivision :ChevroletDivision , :GMCDivision .
+
+:ChevroletDivision a owl:NamedIndividual , :AutomotiveBrandDivision ; rdfs:label "Chevrolet"@en .
+:GMCDivision a owl:NamedIndividual , :AutomotiveBrandDivision ; rdfs:label "GMC"@en .
+
+:StellantisNV a owl:NamedIndividual , :VehicleManufacturer ;
+    rdfs:label "Stellantis N.V."@en ;
+    :hasDivision :JeepDivision , :RamDivision .
+
+:JeepDivision a owl:NamedIndividual , :AutomotiveBrandDivision ; rdfs:label "Jeep"@en .
+:RamDivision a owl:NamedIndividual , :AutomotiveBrandDivision ; rdfs:label "Ram Trucks"@en .
+
+:ToyotaMotorCorporation a owl:NamedIndividual , :VehicleManufacturer ;
+    rdfs:label "Toyota Motor Corporation"@en ; :headquarteredIn :Japan .
+
+:HondaMotorCompany a owl:NamedIndividual , :VehicleManufacturer ;
+    rdfs:label "Honda Motor Company"@en ; :headquarteredIn :Japan .
+
+:NissanMotorCompany a owl:NamedIndividual , :VehicleManufacturer ;
+    rdfs:label "Nissan Motor Company"@en ; :headquarteredIn :Japan .
+
+:SubaruCorporation a owl:NamedIndividual , :VehicleManufacturer ;
+    rdfs:label "Subaru Corporation"@en ; :headquarteredIn :Japan .
+
+:HyundaiMotorCompany a owl:NamedIndividual , :VehicleManufacturer ;
+    rdfs:label "Hyundai Motor Company"@en ; :headquarteredIn :SouthKorea .
+
+:KiaCorporation a owl:NamedIndividual , :VehicleManufacturer ;
+    rdfs:label "Kia Corporation"@en ; :headquarteredIn :SouthKorea .
+
+:TeslaInc a owl:NamedIndividual , :VehicleManufacturer ;
+    rdfs:label "Tesla, Inc."@en ; :headquarteredIn :Texas .
+
+:BMWAG a owl:NamedIndividual , :VehicleManufacturer ;
+    rdfs:label "Bayerische Motoren Werke AG"@en ; :headquarteredIn :Germany .
+
+:MercedesBenzGroupAG a owl:NamedIndividual , :VehicleManufacturer ;
+    rdfs:label "Mercedes-Benz Group AG"@en ; :headquarteredIn :Germany .
+
+:VolkswagenAG a owl:NamedIndividual , :VehicleManufacturer ;
+    rdfs:label "Volkswagen AG"@en ; :headquarteredIn :Germany .
+
+# =====================================================================
+# 13. INDIVIDUALS — ASSEMBLY PLANTS
+# =====================================================================
+
+:DearbornTruckPlant a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Dearborn Truck Plant"@en ; :facilityLocatedIn :Michigan .
+:KansasCityAssemblyPlant a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Kansas City Assembly Plant"@en ; :facilityLocatedIn :Missouri .
+:CuautitlanAssemblyPlant a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Cuautitlan Assembly Plant"@en ; :facilityLocatedIn :Mexico .
+:FortWayneAssemblyPlant a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Fort Wayne Assembly Plant"@en ; :facilityLocatedIn :Indiana .
+:SilaoAssemblyPlant a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Silao Assembly Plant"@en ; :facilityLocatedIn :Guanajuato .
+:ToledoAssemblyComplex a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Toledo Assembly Complex"@en ; :facilityLocatedIn :Ohio .
+:SterlingHeightsAssemblyPlant a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Sterling Heights Assembly Plant"@en ; :facilityLocatedIn :Michigan .
+:ToyotaMotorManufacturingKentucky a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Toyota Motor Manufacturing Kentucky"@en ; :facilityLocatedIn :Kentucky .
+:ToyotaMotorManufacturingCanada a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Toyota Motor Manufacturing Canada (Woodstock)"@en ; :facilityLocatedIn :Ontario .
+:HondaEastLibertyPlant a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Honda East Liberty Auto Plant"@en ; :facilityLocatedIn :Ohio .
+:HondaIndianaAutoPlant a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Honda Indiana Auto Plant"@en ; :facilityLocatedIn :Indiana .
+:NissanSmyrnaAssemblyPlant a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Nissan Smyrna Vehicle Assembly Plant"@en ; :facilityLocatedIn :Tennessee .
+:SubaruOfIndianaAutomotive a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Subaru of Indiana Automotive"@en ; :facilityLocatedIn :Indiana .
+:HyundaiMotorManufacturingAlabama a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Hyundai Motor Manufacturing Alabama"@en ; :facilityLocatedIn :Alabama .
+:KiaGeorgiaPlant a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Kia Georgia (West Point)"@en ; :facilityLocatedIn :Georgia .
+:TeslaFremontFactory a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Tesla Fremont Factory"@en ; :facilityLocatedIn :California .
+:TeslaGigafactoryTexas a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Tesla Gigafactory Texas"@en ; :facilityLocatedIn :Texas .
+:BMWSpartanburgPlant a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "BMW Plant Spartanburg"@en ; :facilityLocatedIn :SouthCarolina .
+:MercedesTuscaloosaPlant a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Mercedes-Benz U.S. International (Tuscaloosa)"@en ; :facilityLocatedIn :Alabama .
+:VolkswagenChattanoogaPlant a owl:NamedIndividual , :VehicleAssemblyPlant ;
+    rdfs:label "Volkswagen Chattanooga Assembly Plant"@en ; :facilityLocatedIn :Tennessee .
+
+:FordMotorCompany :operatesFacility :DearbornTruckPlant , :KansasCityAssemblyPlant , :CuautitlanAssemblyPlant .
+:GeneralMotorsCompany :operatesFacility :FortWayneAssemblyPlant , :SilaoAssemblyPlant .
+:StellantisNV :operatesFacility :ToledoAssemblyComplex , :SterlingHeightsAssemblyPlant .
+:ToyotaMotorCorporation :operatesFacility :ToyotaMotorManufacturingKentucky , :ToyotaMotorManufacturingCanada .
+:HondaMotorCompany :operatesFacility :HondaEastLibertyPlant , :HondaIndianaAutoPlant .
+:NissanMotorCompany :operatesFacility :NissanSmyrnaAssemblyPlant .
+:SubaruCorporation :operatesFacility :SubaruOfIndianaAutomotive .
+:HyundaiMotorCompany :operatesFacility :HyundaiMotorManufacturingAlabama .
+:KiaCorporation :operatesFacility :KiaGeorgiaPlant .
+:TeslaInc :operatesFacility :TeslaFremontFactory , :TeslaGigafactoryTexas .
+:BMWAG :operatesFacility :BMWSpartanburgPlant .
+:MercedesBenzGroupAG :operatesFacility :MercedesTuscaloosaPlant .
+:VolkswagenAG :operatesFacility :VolkswagenChattanoogaPlant .
+
+# =====================================================================
+# 14. VEHICLE MODELS
+#
+# Each model IRI is punned: a CLASS (all physical vehicles of that model)
+# and an INDIVIDUAL of type :VehicleModelSpecification (what the
+# statistics in section 15 are about).
+# =====================================================================
+
+# ---- Ford F-150 -----------------------------------------------------
+:FordF150 a owl:Class ;
+    rdfs:subClassOf :LightDutyPickupTruck , :InternalCombustionVehicle ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :FordMotorCompany ] ,
+        [ a owl:Restriction ; owl:onProperty :assembledAtFacility ;
+          owl:someValuesFrom [ a owl:Class ; owl:oneOf ( :DearbornTruckPlant :KansasCityAssemblyPlant ) ] ] ;
+    rdfs:label "Ford F-150"@en .
+:FordF150 a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "F-150" ;
+    :assembledAtFacility :DearbornTruckPlant , :KansasCityAssemblyPlant .
+:FordMotorCompany :producesModel :FordF150 .
+
+# ---- Ford Mustang Mach-E -------------------------------------------
+:FordMustangMachE a owl:Class ;
+    rdfs:subClassOf :CrossoverUtilityVehicle , :BatteryElectricVehicle ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :FordMotorCompany ] ;
+    rdfs:label "Ford Mustang Mach-E"@en .
+:FordMustangMachE a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "Mustang Mach-E" ;
+    :assembledAtFacility :CuautitlanAssemblyPlant .
+:FordMotorCompany :producesModel :FordMustangMachE .
+
+# ---- Chevrolet Silverado 1500 --------------------------------------
+:ChevroletSilverado1500 a owl:Class ;
+    rdfs:subClassOf :LightDutyPickupTruck ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :GeneralMotorsCompany ] ;
+    rdfs:label "Chevrolet Silverado 1500"@en .
+:ChevroletSilverado1500 a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "Silverado 1500" ;
+    :assembledAtFacility :FortWayneAssemblyPlant , :SilaoAssemblyPlant .
+:GeneralMotorsCompany :producesModel :ChevroletSilverado1500 .
+
+# ---- Ram 1500 -------------------------------------------------------
+:Ram1500 a owl:Class ;
+    rdfs:subClassOf :LightDutyPickupTruck ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :StellantisNV ] ;
+    rdfs:label "Ram 1500"@en .
+:Ram1500 a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "Ram 1500" ;
+    :assembledAtFacility :SterlingHeightsAssemblyPlant .
+:StellantisNV :producesModel :Ram1500 .
+
+# ---- Jeep Wrangler --------------------------------------------------
+:JeepWrangler a owl:Class ;
+    rdfs:subClassOf :MidsizeSportUtilityVehicle ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :StellantisNV ] ,
+        [ a owl:Restriction ; owl:onProperty obo:RO_0000053 ; owl:someValuesFrom :OffRoadCapability ] ,
+        [ a owl:Restriction ; owl:onProperty obo:BFO_0000051 ; owl:someValuesFrom :BodyOnFrameChassis ] ;
+    rdfs:label "Jeep Wrangler"@en .
+:JeepWrangler a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "Wrangler" ;
+    :assembledAtFacility :ToledoAssemblyComplex .
+:StellantisNV :producesModel :JeepWrangler .
+
+# ---- Toyota RAV4 ----------------------------------------------------
+:ToyotaRAV4 a owl:Class ;
+    rdfs:subClassOf :CompactSportUtilityVehicle , :CrossoverUtilityVehicle ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :ToyotaMotorCorporation ] ;
+    rdfs:label "Toyota RAV4"@en .
+:ToyotaRAV4 a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "RAV4" ;
+    :assembledAtFacility :ToyotaMotorManufacturingKentucky , :ToyotaMotorManufacturingCanada .
+:ToyotaMotorCorporation :producesModel :ToyotaRAV4 .
+
+# ---- Toyota Camry ---------------------------------------------------
+:ToyotaCamry a owl:Class ;
+    rdfs:subClassOf :Sedan ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :ToyotaMotorCorporation ] ;
+    rdfs:label "Toyota Camry"@en .
+:ToyotaCamry a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "Camry" ;
+    :assembledAtFacility :ToyotaMotorManufacturingKentucky .
+:ToyotaMotorCorporation :producesModel :ToyotaCamry .
+
+# ---- Honda CR-V -----------------------------------------------------
+:HondaCRV a owl:Class ;
+    rdfs:subClassOf :CompactSportUtilityVehicle , :CrossoverUtilityVehicle ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :HondaMotorCompany ] ;
+    rdfs:label "Honda CR-V"@en .
+:HondaCRV a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "CR-V" ;
+    :assembledAtFacility :HondaEastLibertyPlant .
+:HondaMotorCompany :producesModel :HondaCRV .
+
+# ---- Honda Civic ----------------------------------------------------
+:HondaCivic a owl:Class ;
+    rdfs:subClassOf :Sedan ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :HondaMotorCompany ] ;
+    rdfs:label "Honda Civic"@en .
+:HondaCivic a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "Civic" ;
+    :assembledAtFacility :HondaIndianaAutoPlant .
+:HondaMotorCompany :producesModel :HondaCivic .
+
+# ---- Nissan Rogue ---------------------------------------------------
+:NissanRogue a owl:Class ;
+    rdfs:subClassOf :CompactSportUtilityVehicle , :CrossoverUtilityVehicle ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :NissanMotorCompany ] ;
+    rdfs:label "Nissan Rogue"@en .
+:NissanRogue a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "Rogue" ;
+    :assembledAtFacility :NissanSmyrnaAssemblyPlant .
+:NissanMotorCompany :producesModel :NissanRogue .
+
+# ---- Subaru Outback -------------------------------------------------
+:SubaruOutback a owl:Class ;
+    rdfs:subClassOf :CrossoverUtilityVehicle ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :SubaruCorporation ] ,
+        [ a owl:Restriction ; owl:onProperty obo:RO_0000053 ; owl:someValuesFrom :OffRoadCapability ] ;
+    rdfs:label "Subaru Outback"@en .
+:SubaruOutback a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "Outback" ;
+    :assembledAtFacility :SubaruOfIndianaAutomotive .
+:SubaruCorporation :producesModel :SubaruOutback .
+
+# ---- Hyundai Tucson -------------------------------------------------
+:HyundaiTucson a owl:Class ;
+    rdfs:subClassOf :CompactSportUtilityVehicle , :CrossoverUtilityVehicle ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :HyundaiMotorCompany ] ;
+    rdfs:label "Hyundai Tucson"@en .
+:HyundaiTucson a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "Tucson" ;
+    :assembledAtFacility :HyundaiMotorManufacturingAlabama .
+:HyundaiMotorCompany :producesModel :HyundaiTucson .
+
+# ---- Kia Telluride --------------------------------------------------
+:KiaTelluride a owl:Class ;
+    rdfs:subClassOf :MidsizeSportUtilityVehicle , :CrossoverUtilityVehicle ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :KiaCorporation ] ;
+    rdfs:label "Kia Telluride"@en .
+:KiaTelluride a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "Telluride" ;
+    :assembledAtFacility :KiaGeorgiaPlant .
+:KiaCorporation :producesModel :KiaTelluride .
+
+# ---- Tesla Model Y --------------------------------------------------
+:TeslaModelY a owl:Class ;
+    rdfs:subClassOf :CrossoverUtilityVehicle , :BatteryElectricVehicle ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :TeslaInc ] ;
+    rdfs:label "Tesla Model Y"@en .
+:TeslaModelY a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "Model Y" ;
+    :assembledAtFacility :TeslaFremontFactory , :TeslaGigafactoryTexas .
+:TeslaInc :producesModel :TeslaModelY .
+
+# ---- BMW X5 ---------------------------------------------------------
+:BMWX5 a owl:Class ;
+    rdfs:subClassOf :MidsizeSportUtilityVehicle , :CrossoverUtilityVehicle ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :BMWAG ] ;
+    rdfs:label "BMW X5"@en .
+:BMWX5 a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "X5" ;
+    :assembledAtFacility :BMWSpartanburgPlant .
+:BMWAG :producesModel :BMWX5 .
+
+# ---- Mercedes-Benz GLE ----------------------------------------------
+:MercedesBenzGLE a owl:Class ;
+    rdfs:subClassOf :MidsizeSportUtilityVehicle , :CrossoverUtilityVehicle ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :MercedesBenzGroupAG ] ;
+    rdfs:label "Mercedes-Benz GLE"@en .
+:MercedesBenzGLE a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "GLE" ;
+    :assembledAtFacility :MercedesTuscaloosaPlant .
+:MercedesBenzGroupAG :producesModel :MercedesBenzGLE .
+
+# ---- Volkswagen Atlas -----------------------------------------------
+:VolkswagenAtlas a owl:Class ;
+    rdfs:subClassOf :MidsizeSportUtilityVehicle , :CrossoverUtilityVehicle ,
+        [ a owl:Restriction ; owl:onProperty :manufacturedBy ; owl:hasValue :VolkswagenAG ] ;
+    rdfs:label "Volkswagen Atlas"@en .
+:VolkswagenAtlas a owl:NamedIndividual , :VehicleModelSpecification ;
+    :hasModelDesignation "Atlas" ;
+    :assembledAtFacility :VolkswagenChattanoogaPlant .
+:VolkswagenAG :producesModel :VolkswagenAtlas .
+
+# ---- Example physical vehicle instances (so instance-level DL
+#      queries such as "VehicleManufacturer that manufactures some
+#      PickupTruck" return results) ---------------------------------
+
+:Vehicle_1FTFW1E80RFA00001 a owl:NamedIndividual , :FordF150 ;
+    :hasVehicleIdentificationNumber "1FTFW1E80RFA00001" ;
+    :hasModelYear "2024"^^xsd:gYear ;
+    :conformsToModel :FordF150 ;
+    :assembledAtFacility :DearbornTruckPlant ;
+    obo:BFO_0000051 [ a :OpenCargoBed ] .
+
+:Vehicle_2T3W1RFV0RW000002 a owl:NamedIndividual , :ToyotaRAV4 ;
+    :hasVehicleIdentificationNumber "2T3W1RFV0RW000002" ;
+    :hasModelYear "2024"^^xsd:gYear ;
+    :conformsToModel :ToyotaRAV4 ;
+    :assembledAtFacility :ToyotaMotorManufacturingKentucky .
+
+:Vehicle_7SAYGDEE0RF000003 a owl:NamedIndividual , :TeslaModelY ;
+    :hasVehicleIdentificationNumber "7SAYGDEE0RF000003" ;
+    :hasModelYear "2024"^^xsd:gYear ;
+    :conformsToModel :TeslaModelY ;
+    :assembledAtFacility :TeslaGigafactoryTexas ;
+    obo:BFO_0000051 [ a :TractionBattery ] , [ a :ElectricTractionMotor ] .
+
+# =====================================================================
+# 15. PER-CAPITA POPULARITY DATA (UNITED STATES)
+#
+# *** ALL VALUES BELOW ARE ILLUSTRATIVE PLACEHOLDERS ***
+# Replace with licensed vehicles-in-operation data before analysis.
+# =====================================================================
+
+:PerCapita_FordF150_US_2024 a owl:NamedIndividual , :PerCapitaAdoptionRateDatum ;
+    rdfs:label "Ford F-150 per capita adoption, United States, 2024"@en ;
+    :isAboutModel :FordF150 ;
+    :pertainsToRegion :UnitedStatesOfAmerica ;
+    :hasRegistrationCount 16000000 ;
+    :hasReferencePopulationCount 335000000 ;
+    :hasVehiclesPerThousandPersons "47.8"^^xsd:decimal ;
+    :hasMeasurementYear "2024"^^xsd:gYear ;
+    :hasNationalPerCapitaRank 1 ;
+    :hasDataProvenanceNote "PLACEHOLDER VALUE — replace with S&P Global Mobility vehicles-in-operation counts and U.S. Census Bureau population estimates." .
+
+:PerCapita_ChevroletSilverado_US_2024 a owl:NamedIndividual , :PerCapitaAdoptionRateDatum ;
+    rdfs:label "Chevrolet Silverado 1500 per capita adoption, United States, 2024"@en ;
+    :isAboutModel :ChevroletSilverado1500 ;
+    :pertainsToRegion :UnitedStatesOfAmerica ;
+    :hasRegistrationCount 11000000 ;
+    :hasReferencePopulationCount 335000000 ;
+    :hasVehiclesPerThousandPersons "32.8"^^xsd:decimal ;
+    :hasMeasurementYear "2024"^^xsd:gYear ;
+    :hasNationalPerCapitaRank 2 ;
+    :hasDataProvenanceNote "PLACEHOLDER VALUE." .
+
+:PerCapita_ToyotaRAV4_US_2024 a owl:NamedIndividual , :PerCapitaAdoptionRateDatum ;
+    rdfs:label "Toyota RAV4 per capita adoption, United States, 2024"@en ;
+    :isAboutModel :ToyotaRAV4 ;
+    :pertainsToRegion :UnitedStatesOfAmerica ;
+    :hasRegistrationCount 8000000 ;
+    :hasReferencePopulationCount 335000000 ;
+    :hasVehiclesPerThousandPersons "23.9"^^xsd:decimal ;
+    :hasMeasurementYear "2024"^^xsd:gYear ;
+    :hasNationalPerCapitaRank 3 ;
+    :hasDataProvenanceNote "PLACEHOLDER VALUE." .
+
+:PerCapita_ToyotaCamry_US_2024 a owl:NamedIndividual , :PerCapitaAdoptionRateDatum ;
+    rdfs:label "Toyota Camry per capita adoption, United States, 2024"@en ;
+    :isAboutModel :ToyotaCamry ;
+    :pertainsToRegion :UnitedStatesOfAmerica ;
+    :hasRegistrationCount 7500000 ;
+    :hasReferencePopulationCount 335000000 ;
+    :hasVehiclesPerThousandPersons "22.4"^^xsd:decimal ;
+    :hasMeasurementYear "2024"^^xsd:gYear ;
+    :hasNationalPerCapitaRank 4 ;
+    :hasDataProvenanceNote "PLACEHOLDER VALUE." .
+
+:PerCapita_HondaCRV_US_2024 a owl:NamedIndividual , :PerCapitaAdoptionRateDatum ;
+    rdfs:label "Honda CR-V per capita adoption, United States, 2024"@en ;
+    :isAboutModel :HondaCRV ;
+    :pertainsToRegion :UnitedStatesOfAmerica ;
+    :hasRegistrationCount 6500000 ;
+    :hasReferencePopulationCount 335000000 ;
+    :hasVehiclesPerThousandPersons "19.4"^^xsd:decimal ;
+    :hasMeasurementYear "2024"^^xsd:gYear ;
+    :hasNationalPerCapitaRank 5 ;
+    :hasDataProvenanceNote "PLACEHOLDER VALUE." .
+
+:PerCapita_TeslaModelY_US_2024 a owl:NamedIndividual , :PerCapitaAdoptionRateDatum ;
+    rdfs:label "Tesla Model Y per capita adoption, United States, 2024"@en ;
+    :isAboutModel :TeslaModelY ;
+    :pertainsToRegion :UnitedStatesOfAmerica ;
+    :hasRegistrationCount 1500000 ;
+    :hasReferencePopulationCount 335000000 ;
+    :hasVehiclesPerThousandPersons "4.5"^^xsd:decimal ;
+    :hasMeasurementYear "2024"^^xsd:gYear ;
+    :hasNationalPerCapitaRank 12 ;
+    :hasDataProvenanceNote "PLACEHOLDER VALUE." .
+
+# ---- State-level per capita examples --------------------------------
+
+:PerCapita_SubaruOutback_Vermont_2024 a owl:NamedIndividual , :PerCapitaAdoptionRateDatum ;
+    rdfs:label "Subaru Outback per capita adoption, Vermont, 2024"@en ;
+    :isAboutModel :SubaruOutback ;
+    :pertainsToRegion :Vermont ;
+    :hasRegistrationCount 40000 ;
+    :hasReferencePopulationCount 647000 ;
+    :hasVehiclesPerThousandPersons "61.8"^^xsd:decimal ;
+    :hasMeasurementYear "2024"^^xsd:gYear ;
+    :hasDataProvenanceNote "PLACEHOLDER VALUE." .
+
+:PerCapita_FordF150_Texas_2024 a owl:NamedIndividual , :PerCapitaAdoptionRateDatum ;
+    rdfs:label "Ford F-150 per capita adoption, Texas, 2024"@en ;
+    :isAboutModel :FordF150 ;
+    :pertainsToRegion :Texas ;
+    :hasRegistrationCount 2400000 ;
+    :hasReferencePopulationCount 30500000 ;
+    :hasVehiclesPerThousandPersons "78.7"^^xsd:decimal ;
+    :hasMeasurementYear "2024"^^xsd:gYear ;
+    :hasDataProvenanceNote "PLACEHOLDER VALUE." .
+
+:PerCapita_TeslaModelY_California_2024 a owl:NamedIndividual , :PerCapitaAdoptionRateDatum ;
+    rdfs:label "Tesla Model Y per capita adoption, California, 2024"@en ;
+    :isAboutModel :TeslaModelY ;
+    :pertainsToRegion :California ;
+    :hasRegistrationCount 450000 ;
+    :hasReferencePopulationCount 39000000 ;
+    :hasVehiclesPerThousandPersons "11.5"^^xsd:decimal ;
+    :hasMeasurementYear "2024"^^xsd:gYear ;
+    :hasDataProvenanceNote "PLACEHOLDER VALUE." .
+
+# =====================================================================
+# 16. DEFINED CLASSES FOR MANUFACTURER TYPING (CQ1 via reasoner)
+# =====================================================================
+
+:PickupTruckManufacturer a owl:Class ;
+    rdfs:label "Pickup Truck Manufacturer"@en ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( :VehicleManufacturer
+                             [ a owl:Restriction ; owl:onProperty :manufactures ; owl:someValuesFrom :PickupTruck ] ) ] .
+
+:SportUtilityVehicleManufacturer a owl:Class ;
+    rdfs:label "Sport Utility Vehicle Manufacturer"@en ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( :VehicleManufacturer
+                             [ a owl:Restriction ; owl:onProperty :manufactures ; owl:someValuesFrom :SportUtilityVehicle ] ) ] .
+
+:BatteryElectricVehicleManufacturer a owl:Class ;
+    rdfs:label "Battery Electric Vehicle Manufacturer"@en ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( :VehicleManufacturer
+                             [ a owl:Restriction ; owl:onProperty :manufactures ; owl:someValuesFrom :BatteryElectricVehicle ] ) ] .
+
+:UnitedStatesAssembledVehicle a owl:Class ;
+    rdfs:label "United States Assembled Vehicle"@en ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( :Vehicle
+                             [ a owl:Restriction ; owl:onProperty :assembledInRegion ; owl:hasValue :UnitedStatesOfAmerica ] ) ] .
+
+# =====================================================================
+# 17. EXAMPLE SPARQL QUERIES (documentation only)
+#
+# CQ1 — What type of vehicle does each manufacturer make?
+#   SELECT ?mfrLabel ?modelLabel ?typeLabel WHERE {
+#     ?mfr a vmo:VehicleManufacturer ; rdfs:label ?mfrLabel ;
+#          vmo:producesModel ?model .
+#     ?model rdfs:label ?modelLabel ; rdfs:subClassOf ?type .
+#     ?type rdfs:subClassOf* vmo:MotorVehicle ; rdfs:label ?typeLabel .
+#   } ORDER BY ?mfrLabel
+#
+# CQ2 — Where is each model assembled (plant, state, country)?
+#   SELECT ?modelLabel ?plantLabel ?regionLabel WHERE {
+#     ?model a vmo:VehicleModelSpecification ; rdfs:label ?modelLabel ;
+#            vmo:assembledAtFacility ?plant .
+#     ?plant rdfs:label ?plantLabel ; vmo:facilityLocatedIn ?region .
+#     ?region rdfs:label ?regionLabel .
+#   }
+#
+# CQ2b — Which manufacturers build vehicles inside the United States?
+#   SELECT DISTINCT ?mfrLabel WHERE {
+#     ?mfr rdfs:label ?mfrLabel ; vmo:producesModel ?model .
+#     ?model vmo:assembledAtFacility ?plant .
+#     ?plant vmo:facilityLocatedIn/vmo:regionPartOf* vmo:UnitedStatesOfAmerica .
+#   }
+#
+# CQ3 — Most popular models per capita in the United States:
+#   SELECT ?modelLabel ?rate WHERE {
+#     ?d a vmo:PerCapitaAdoptionRateDatum ;
+#        vmo:pertainsToRegion vmo:UnitedStatesOfAmerica ;
+#        vmo:isAboutModel ?model ;
+#        vmo:hasVehiclesPerThousandPersons ?rate ;
+#        vmo:hasMeasurementYear "2024"^^xsd:gYear .
+#     ?model rdfs:label ?modelLabel .
+#   } ORDER BY DESC(?rate) LIMIT 10
+#
+# CQ3b — Most popular model per capita in each U.S. state:
+#   SELECT ?stateLabel ?modelLabel (MAX(?rate) AS ?topRate) WHERE {
+#     ?d vmo:pertainsToRegion ?state ; vmo:isAboutModel ?model ;
+#        vmo:hasVehiclesPerThousandPersons ?rate .
+#     ?state a vmo:StateOrProvince ; rdfs:label ?stateLabel ;
+#            vmo:regionPartOf vmo:UnitedStatesOfAmerica .
+#     ?model rdfs:label ?modelLabel .
+#   } GROUP BY ?stateLabel ?modelLabel ORDER BY DESC(?topRate)
+#
+# DL query equivalents (Protégé, with HermiT/ELK running):
+#   vmo:PickupTruckManufacturer            -> manufacturers of pickups
+#   vmo:HighPerCapitaAdoptionInUnitedStates -> high-adoption data items
+#   vmo:UnitedStatesAssembledVehicle        -> U.S.-built vehicles
+# =====================================================================
